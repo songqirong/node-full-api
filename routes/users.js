@@ -54,7 +54,9 @@ router.get('/cms/all', function(req, res, next) {
 })
 router.post('/cms/login',function(req,res,next){
   let {username,password} = req.body;
+  // console.log(username)
   userModel.find({username,password}).then(arr=>{
+    console.log(arr);
     // console.log(arr);
     if(arr.length>0){
       let token = fetchjwt({username,password});

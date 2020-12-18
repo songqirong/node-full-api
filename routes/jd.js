@@ -4,16 +4,18 @@ var jwt = require('../utils/jwt');
 var shopUserModel = require('../model/shopUserModel');
 var cartModel = require('../model/webapp/cartModel');
 // var orderModel = require('../model/webapp/orderModel');
+var addressModel = require('../model/webapp/addressModel');
 var goodModel = require('../model/goodModel');
 var bannerModel = require('../model/banner/bannerModel');
 // const { delete } = require('./upload');
 router.post('/cms/createBanner',function(req,res,next){
   let {id,img,desc}=req.body
+  console.log(id,img,desc)
   let ele = {
     img,
     desc,
   }
-  if(id==" "){
+  if(!id){
     ele.create_time=Date.now()
     bannerModel.insertMany([ele]).then(arr=>{
       res.json({
@@ -178,6 +180,26 @@ router.get('/getCartList', function(req, res, next) {
     })
   })
   
+   // 获取用户信息
+  router.post('/getUserInfo', function(req, res, next) {
+    jwt.verifyToken(req, res).then(user=>{
+      shopUserModel.find(user).then((userArr)=>{
+        res.json({
+          success:true,
+          data:{
+            err:0,
+            username:userArr[0].username,
+            password:userArr[0].password,
+            create_time:userArr[0].create_time,
+            user_avatar:userArr[0].user_avatar,
+            enjoys_value:userArr[0].enjoys_value,
+            white_credit:userArr[0].white_credit
+          }
+        })
+      })
+    })
+  })
+
   // 改变购物车商品数量
   router.post('/updateCartNum', function(req, res, next) {
     let { num, id } = req.body
@@ -231,4 +253,118 @@ router.get('/getCartList', function(req, res, next) {
       })
     })
   })
+   // 查询收货地址列表
+   router.get('/getAddressList', function(req, res, next) {
+    jwt.verifyToken(req, res).then(user=>{
+      shopUserModel.find(user).then((userArr)=>{
+        addressModel.find({user_id: userArr[0]._id}).then(arr => {
+          let data = {
+            success:true,
+              data:{
+                err:0,
+                msg:'success', 
+                data:arr
+              }
+          }
+          res.json(data)
+        })
+      })
+    })
+  })
+  // 新增收货地址列表
+  router.post('/addressList', function(req, res, next) {
+    const { name, tel, addressDetail, isDefault, postalCode, city, county, country, province, areaCode, id } = req.body;
+    const params = {
+      name,
+      city,
+      county,
+      province,
+      country: country || '中国',
+      tel,
+      addressDetail,
+      isDefault,
+      postalCode,
+      areaCode,
+      create_time: Date.now(),
+    }
+    if(id){
+      delete params.create_time;
+    }
+    jwt.verifyToken(req, res).then(user=>{
+      shopUserModel.find(user).then((userArr)=>{
+        if(isDefault){
+          addressModel.updateMany({user_id: userArr[0]._id},{$set: {isDefault: false}}).then(() => {
+           if(id){
+            addressModel.updateOne({user_id: userArr[0]._id, _id: id}, {$set: params}).then(() => {
+              let data = {
+                success:true,
+                  data:{
+                    err:0,
+                    msg:'修改地址成功', 
+                  }
+              }
+              res.json(data)
+            })
+           }else{
+            addressModel.insertMany({user_id: userArr[0]._id, ...params}).then(arr => {
+              let data = {
+                success:true,
+                  data:{
+                    err:0,
+                    msg:'新增地址成功', 
+                  }
+              }
+              res.json(data)
+            })
+           }
+          })
+        }else{
+          if(id){
+            addressModel.updateOne({user_id: userArr[0]._id, _id: id}, {$set: params}).then(() => {
+              let data = {
+                success:true,
+                  data:{
+                    err:0,
+                    msg:'修改地址成功', 
+                  }
+              }
+              res.json(data)
+            })
+           }else{
+            addressModel.insertMany({user_id: userArr[0]._id, ...params}).then(arr => {
+              let data = {
+                success:true,
+                  data:{
+                    err:0,
+                    msg:'新增地址成功', 
+                  }
+              }
+              res.json(data)
+            })
+           }
+        }
+      })
+    })
+  })
+
+  // 删除收货地址
+  router.delete('/addressList', function(req, res, next) {
+    const { id } = req.query;
+    jwt.verifyToken(req, res).then(user=>{
+      shopUserModel.find(user).then((userArr)=>{
+        addressModel.deleteOne({user_id:userArr[0]._id, _id: id}).then(() => {
+          let data = {
+            success:true,
+              data:{
+                err:0,
+                msg:'删除地址成功', 
+              }
+          }
+          res.json(data)
+        })
+      })
+    })
+  })
+
+
   module.exports=router

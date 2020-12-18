@@ -1,10 +1,13 @@
 const jwt = require('jsonwebtoken');
+
+// 生成token
 function fetchjwt(data){
     return jwt.sign({
         exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24),
         data
       }, 'sqr');
 }
+// 解析token
 function verifyToken(req, res) {
   let token = req.headers.authorization
     // console.log(token)
