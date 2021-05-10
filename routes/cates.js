@@ -18,7 +18,6 @@ router.post('/cms/addCate',function(req,res,next){
               }
           })
         }else{
-          // console.log('发送成功')
           catesModel.insertMany([data]).then(()=>{
             res.json({
                 success:true,
@@ -34,7 +33,6 @@ router.post('/cms/addCate',function(req,res,next){
 })
 router.get('/cms/getCates',function(req,res,next){
   let {page,limit} = req.query;
-  // console.log(req.query)
   page=page?page:1;
   if(limit){
     catesModel.find({}).sort({'create_time':-1}).skip((page-1)*limit).limit(Number(limit)).then(arr=>{
@@ -63,7 +61,6 @@ router.get('/cms/getCates',function(req,res,next){
 })
 router.post('/cms/removeCate',function(req,res,next){
   let {_id} = req.body;
-  // console.log(req.query)
   catesModel.remove({_id}).then(()=>{
     res.json({
       success:true,
@@ -76,7 +73,6 @@ router.post('/cms/removeCate',function(req,res,next){
 })
 router.post('/cms/updateCate',function(req,res,next){
   let {_id,cate_en,cate_zh} = req.body;
-  // console.log(req.query)
   catesModel.updateOne({_id},{$set:{cate_zh,cate_en}}).then(()=>{
     res.json({
       success:true,
@@ -88,8 +84,6 @@ router.post('/cms/updateCate',function(req,res,next){
   })
 })
 router.get('/cms/getCatesCount',function(req,res,next){
-  // let {page,limit} = req.query;
-  // console.log(req.query)
   catesModel.find({}).count().then(arr=>{
     res.json({
       success:true,

@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var userModel = require('../model/userModel');
 var shopUserModel = require('../model/shopUserModel');
-const {fetchjwt} = require('../utils/jwt');
+const {fetchjwt, verifyToken} = require('../utils/jwt');
 
 /* GET users listing. */
 // router.get('/', function(req, res, next) {
@@ -54,13 +54,9 @@ router.get('/cms/all', function(req, res, next) {
 })
 router.post('/cms/login',function(req,res,next){
   let {username,password} = req.body;
-  // console.log(username)
   userModel.find({username,password}).then(arr=>{
-    console.log(arr);
-    // console.log(arr);
     if(arr.length>0){
       let token = fetchjwt({username,password});
-      // console.log(token)
       let data = {
         success:true,
         data:{
@@ -73,7 +69,6 @@ router.post('/cms/login',function(req,res,next){
       res.json(data)
     }else{
       userModel.find({username}).then(arr=>{
-        // console.log(arr)
         let data = {
           success:true,
             data:{
@@ -102,7 +97,6 @@ router.post('/shop/regist',function(req,res,next){
         }
       })
     }else{
-      // console.log('发送成功')
       shopUserModel.insertMany([{username,password,create_time:Date.now()}]).then(arr=>{
         res.json({
           success:true,
@@ -118,7 +112,6 @@ router.post('/shop/regist',function(req,res,next){
 router.get('/shop/all', function(req, res, next) {
   // 查询数据库
   shopUserModel.find({}).then(arr=>{
-    // console.log('user arr', arr)
     let data = {
       success:true,
         data:{
@@ -133,10 +126,8 @@ router.get('/shop/all', function(req, res, next) {
 router.post('/shop/login',function(req,res,next){
   let {username,password} = req.body;
   shopUserModel.find({username,password}).then(arr=>{
-    // console.log(arr);
     if(arr.length>0){
       let token = fetchjwt({username,password});
-      // console.log(token)
       let data = {
         success:true,
         data:{
@@ -149,7 +140,6 @@ router.post('/shop/login',function(req,res,next){
       res.json(data)
     }else{
       userModel.find({username}).then(arr=>{
-        // console.log(arr)
         let data = {
           success:true,
             data:{
@@ -161,6 +151,24 @@ router.post('/shop/login',function(req,res,next){
       })
     }
     
+  })
+})
+// 获取用户信息
+router.post('/cms/getUserInfo', function(req, res, next) {
+  verifyToken(req, res).then(user=>{
+    console.log(user,'user')
+    userModel.find(user).then((userArr)=>{
+      res.json({
+        success:true,
+        data:{
+          err:0,
+          username:userArr[0].username,
+          password:userArr[0].password,
+          create_time:userArr[0].create_time,
+          user_avatar:userArr[0].user_avatar,
+        }
+      })
+    })
   })
 })
 module.exports = router;

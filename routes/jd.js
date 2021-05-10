@@ -3,11 +3,9 @@ var router = express.Router();
 var jwt = require('../utils/jwt');
 var shopUserModel = require('../model/shopUserModel');
 var cartModel = require('../model/webapp/cartModel');
-// var orderModel = require('../model/webapp/orderModel');
 var addressModel = require('../model/webapp/addressModel');
 var goodModel = require('../model/goodModel');
 var bannerModel = require('../model/banner/bannerModel');
-// const { delete } = require('./upload');
 router.post('/cms/createBanner',function(req,res,next){
   let {id,img,desc}=req.body
   console.log(id,img,desc)
@@ -99,14 +97,10 @@ router.post('/addToCart', function(req, res, next) {
   
     // 识别用户，使用前端传递过来的token进行解析
     // 入库，
-  
-//   console.log('我进来了');
     num = num || 1
     if (!good_id) return res.json({success:true,data:{err: -1, msg: 'good_id商品id是必填参数'}})
-    // console.log(req.headers)
     // 解析用户身份
     jwt.verifyToken(req, res).then(user=>{
-        // console.log(user)
       // 把token反解析成功后，就得到了用户名和密码
       shopUserModel.find(user).then(arr=>{
         let item = {
