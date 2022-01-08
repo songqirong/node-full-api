@@ -1,7 +1,7 @@
 // 引入模块
 const mongoose = require('mongoose');
 // 连接
-mongoose.connect('mongodb://localhost/qf2002',{
+mongoose.connect('mongodb://localhost/webapp',{
     useNewUrlParser:true,
     useUnifiedTopology:true
 })
